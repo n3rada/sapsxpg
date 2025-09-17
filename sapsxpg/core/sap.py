@@ -388,9 +388,8 @@ class SAPSystem:
                 print(f"[!] Error reading cached file: {e}")
                 # Fall back to fetching fresh data
 
-        # Fetch fresh command list from SAP
         try:
-            response = self.__connection.call("SXPG_COMMAND_LIST_GET", NONE="")
+            response = self.__connection.call("SXPG_COMMAND_LIST_GET")
         except Exception as e:
             return f"[!] Error fetching command list: {e}"
 
