@@ -92,6 +92,8 @@ class SAPSystem:
                     }
                 )
                 print("[i] SAP connection established")
+                print(self.__conn.__dict__)
+
             except Exception as e:
                 print(f"[!] Failed to establish SAP connection: {e}")
                 self.__conn = None
