@@ -71,9 +71,11 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--rce-poc",
-        default="ZSH",
+        default=None,
         type=str,
-        help="Produce a workable Remote Command Execution (RCE) proof-of-concept Python3 code with the given SAP command.",
+        help="Produce a workable Remote Command Execution (RCE) proof-of-concept Python3 code with the given SAP command (if no value is provided, 'ZSH' will be used).",
+        nargs="?",
+        const="ZSH",
     )
 
     return parser.parse_args()

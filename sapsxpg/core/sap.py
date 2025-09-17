@@ -72,6 +72,8 @@ class SAPSystem:
         self.__temp_dir = Path(tempfile.gettempdir()) / username / self.__host
         self.__temp_dir.mkdir(parents=True, exist_ok=True)
 
+        self.__log_file = f"SAP-{self.__host}.log"
+
     def __connect(self):
         """Establish a persistent SAP connection"""
         if self.__conn is None:
@@ -336,7 +338,7 @@ class SAPSystem:
 
         print(f"[i] Executing SAP command: {command_name} {parameters}")
 
-        with open(f"SAP-{self.__host}.log", mode="a", encoding="utf-8") as log_file:
+        with open(self.__log_file, mode="a", encoding="utf-8") as log_file:
             log_file.write(f"> {command_name} {parameters}\n")
 
         try:
@@ -352,7 +354,7 @@ class SAPSystem:
         for result in results:
             result_txt = f"{result_txt}{result['MESSAGE']}\n"
 
-        with open(f"SAP-{self.__host}.log", mode="a", encoding="utf-8") as log_file:
+        with open(self.__log_file, mode="a", encoding="utf-8") as log_file:
             log_file.write(f"{result_txt}\n")
 
         return result_txt
