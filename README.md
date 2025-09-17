@@ -46,4 +46,10 @@ It will generate a file named `poc_aw01585632.aws.sap-noprod.example.com_ZSH.py`
 toboggan -m poc_aw01585632.aws.sap-noprod.example.com_ZSH.py
 ```
 
+## Disclaimer
+
+This tool is intended for use in legal penetration testing, Capture The Flag (CTF) competitions, or other authorized and ethical security assessments.
+
+Unauthorized use of this tool on systems you do not own or without proper authorization may be illegal. Please use-it responsibly and in compliance with applicable laws and regulations.
+
 
