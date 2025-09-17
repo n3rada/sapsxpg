@@ -15,9 +15,9 @@ def nwrfc_sdk_tips():
 
     tips = "⚠️ NWRFCSDK not found."
 
-    tips += "Ensure that the environment variables are set correctly:"
+    tips += " Ensure that the environment variables are set correctly\n"
 
-    tips += "For Linux:"
+    tips += "For Linux:\n"
     tips += """
 NWRFCSDK_PATH=$(find /home /usr/local /opt /srv -type d -path "*/nwrfcsdk" -print -quit 2>/dev/null | head -1)
 export SAPNWRFC_HOME=$NWRFCSDK_PATH
