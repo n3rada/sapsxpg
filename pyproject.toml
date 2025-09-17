@@ -1,5 +1,9 @@
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [project]
-name = "pysxpg"
+name = "sapsxpg"
 version = "0.1.0"
 description = "Simplify the SXPG_CALL_SYSTEM usage on a targeted SAP system."
 authors = [
@@ -7,13 +11,10 @@ authors = [
 ]
 license = {text = "GPL-3.0 license"}
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 dependencies = [
     "prompt-toolkit (>=3.0.52,<4.0.0)",
-    "pyrfc>=2.0.0"  # ⚠️ Requires NWRFCSDK
+    "pyrfc==3.3.1"  # ⚠️ Requires NWRFCSDK
 ]
 
 
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
