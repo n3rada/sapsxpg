@@ -83,10 +83,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     """Run the interactive console application."""
-    if not methods.check_nwrfc_sdk():
-        return 1
-
     print(methods.banner())
+
+    if not methods.check_nwrfc_sdk():
+        print(methods.nwrfc_sdk_tips())
+        return 1
 
     args = parse_args()
 

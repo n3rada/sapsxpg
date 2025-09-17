@@ -6,7 +6,10 @@ import getpass
 from pathlib import Path
 import tempfile
 
-from pyrfc import Connection
+try:
+    from pyrfc import Connection
+except ImportError:
+    Connection = None  # Handle missing pyrfc gracefully
 
 
 def get_os_variants(os_name):
@@ -92,8 +95,6 @@ class SAPSystem:
                     }
                 )
                 print("[i] SAP connection established")
-                print(self.__conn.__dict__)
-
             except Exception as e:
                 print(f"[!] Failed to establish SAP connection: {e}")
                 self.__conn = None

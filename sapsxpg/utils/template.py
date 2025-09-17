@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
-from pyrfc import Connection
+try:
+    from pyrfc import Connection
+except ImportError:
+    Connection = None  # Handle missing pyrfc gracefully
 
 
 def execute(command: str, timeout: float = None) -> str:
