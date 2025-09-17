@@ -24,20 +24,20 @@ export LD_LIBRARY_PATH="$NWRFCSDK_PATH/lib:"
 ## Installation
 
 ```shell
-pipx install 'git+https://github.com/n3rada/sapsxpg.git'
+pipx install 'sapsxpg@git+https://github.com/n3rada/sapsxpg.git'
 ```
 
 ## Usage
 
 ```shell
-sapsxpg aw01585632.aws.sap-noprod.example.com SAPTEST P@ass!w0rd/7
+sapsxpg 'aw01585632.aws.sap-noprod.example.com' 'SAPTEST' 'P@ass!w0rd/7'
 ```
 
 ## Remote Command Execution (RCE)
 
 If the underlying system contains a command that allows you to execute commands on the remote system, you can connect it with [`toboggan`](https://github.com/n3rada/toboggan). First of all, generate the Remote Commande Execution proof of concept (PoC) with:
 ```shell
-sapsxpg 'aw01585632.aws.sap-noprod.example.com' SAPTEST 'P@ass!w0rd/7' --rce-poc "ZSH"
+sapsxpg 'aw01585632.aws.sap-noprod.example.com' 'SAPTEST' 'P@ass!w0rd/7' --rce-poc "ZSH"
 ```
 
 It will generate a file named `poc_aw01585632.aws.sap-noprod.example.com_ZSH.py`. Plug-it with `toboggan`:
