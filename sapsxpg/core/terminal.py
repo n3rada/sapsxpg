@@ -56,7 +56,7 @@ def run(sap_system) -> None:
         enable_history_search=True,
         wrap_lines=True,
         auto_suggest=ThreadedAutoSuggest(auto_suggest=AutoSuggestFromHistory()),
-        history=ThreadedHistory(history=FileHistory(f"/tmp/{sap_system.host}.history")),
+        history=ThreadedHistory(history=FileHistory(f"{sap_system.histfile}")),
         completer=command_completer,
         complete_while_typing=True,
     )

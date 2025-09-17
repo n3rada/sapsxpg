@@ -73,6 +73,7 @@ class SAPSystem:
         self.__temp_dir.mkdir(parents=True, exist_ok=True)
 
         self.__log_file = f"SAP-{self.__host}.log"
+        self.__histfile = f"{self.__temp_dir}/.sapsxpg_history"
 
     def __connect(self):
         """Establish a persistent SAP connection"""
@@ -472,6 +473,22 @@ class SAPSystem:
             return []
 
     # Properties
+    @property
+    def host(self):
+        return self.__host
+
+    @property
+    def os(self):
+        return self.__os
+
+    @property
+    def user(self):
+        return self.__user
+
+    @property
+    def histfile(self):
+        return self.__histfile
+
     @property
     def __connection(self):
         """Get the current SAP connection (establish if not connected)"""
