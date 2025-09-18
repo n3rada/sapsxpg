@@ -11,12 +11,12 @@ The `NWRFCSDK` is proprietary SAP software, not open source. It requires an S-Us
 If you already have `nwrfcsdk` dropped somewhere on your system, you can, in a Linux environment, find-it with:
 
 ```shell
-find /home /usr/local /opt /srv -type d -path "*/nwrfcsdk" -print -quit 2>/dev/null
+find /opt /home /usr/local /srv -type d -path "*/nwrfcsdk" -print -quit 2>/dev/null
 ```
 
 It will give you a path, use this one to export the two mandatory variables:
 ```shell
-NWRFCSDK_PATH=$(find /home /usr/local /opt /srv -type d -path "*/nwrfcsdk" -print -quit 2>/dev/null | head -1)
+NWRFCSDK_PATH=$(find /opt /home /usr/local /srv -type d -path "*/nwrfcsdk" -print -quit 2>/dev/null | head -1)
 export SAPNWRFC_HOME=$NWRFCSDK_PATH
 export LD_LIBRARY_PATH="$NWRFCSDK_PATH/lib:"
 ```
