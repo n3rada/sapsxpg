@@ -1,4 +1,4 @@
-## File: sapsxpg/core/sap.py
+# sapsxpg/core/sap.py
 
 import json
 import os
@@ -57,13 +57,25 @@ def get_os_variants(os_name):
 class SAPSystem:
     """Main SAP system class that handles configuration, connection, and command execution"""
 
-    def __init__(self, host, user, passwd, client="500", sysnr="00", group="SPACE"):
+    def __init__(
+        self,
+        host,
+        user,
+        passwd,
+        client="500",
+        sysnr="00",
+        group=None,
+        timeout=30,
+        trace=True,
+    ):
         self.__host = host
         self.__user = user
         self.__passwd = passwd
         self.__client = client
         self.__sysnr = sysnr
         self.__group = group
+        self.__timeout = timeout
+        self.__trace = trace
         self.__os = "all"  # Default OS filter
 
         self.__conn = None  # Persistent SAP connection
@@ -82,33 +94,40 @@ class SAPSystem:
         """Establish a persistent SAP connection"""
         if self.__conn is None:
             try:
-                self.__conn = Connection(
-                    **{
-                        "user": self.__user,
-                        "passwd": self.__passwd,
-                        "ashost": self.__host,
-                        "client": self.__client,
-                        "sysnr": self.__sysnr,
-                        "group": self.__group,
-                        "lang": "EN",
-                        "trace": "3",
-                    }
-                )
+                # Build connection parameters
+                conn_params = {
+                    "user": self.__user,
+                    "passwd": self.__passwd,
+                    "ashost": self.__host,
+                    "client": self.__client,
+                    "sysnr": self.__sysnr,
+                    "lang": "EN",
+                    "config": {"timeout": self.__timeout},
+                }
+
+                # Add trace parameter if enabled
+                if self.__trace:
+                    conn_params["trace"] = "3"
+
+                # Only include group if it's not None
+                if self.__group is not None:
+                    conn_params["group"] = self.__group
+
+                self.__conn = Connection(**conn_params)
                 print("[i] SAP connection established")
+            except KeyboardInterrupt:
+                print("\n[!] Connection interrupted by user")
+                raise  # Re-raise to let CLI handle it
             except Exception as e:
                 print(f"[!] Failed to establish SAP connection: {e}")
-                self.__conn = None
+                raise  # Re-raise to let CLI handle it
 
     def __disconnect(self):
         """Close the persistent SAP connection"""
         if self.__conn:
-            try:
-                self.__conn.close()
-                print("[i] SAP connection closed")
-            except Exception as e:
-                print(f"[!] Failed to close SAP connection: {e}")
-            finally:
-                self.__conn = None
+
+            self.__conn.close()
+            print("[i] SAP connection closed")
 
     def detect_current_os(self):
         """Auto-detect the remote SAP system's operating system"""
@@ -482,6 +501,10 @@ class SAPSystem:
     @property
     def os(self):
         return self.__os
+
+    @os.setter
+    def os(self, value):
+        self.__os = value
 
     @property
     def user(self):
