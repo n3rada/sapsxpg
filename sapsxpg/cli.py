@@ -1,14 +1,4 @@
-## File: sapsxpg/cli.py
-
-"""Command Line Interface for SAP SXPG Command Execution.
-
-This module provides the command-line interface for executing SAP system commands
-through the SXPG_CALL_SYSTEM function module. It handles argument parsing,
-initializes the SAP connection, and manages the interactive terminal session.
-
-The CLI supports various connection parameters and operating system filtering
-options for command execution.
-"""
+# sapsxpg/cli.py
 
 import argparse
 from pathlib import Path
@@ -58,8 +48,20 @@ def parse_args() -> argparse.Namespace:
         help="SAP system number (default: 00)",
     )
 
+    parser.add_argument("-g", "--group", default=None, help="SAP logon group")
+
     parser.add_argument(
-        "-g", "--group", default="SPACE", help="SAP logon group (default: SPACE)"
+        "-t",
+        "--timeout",
+        type=int,
+        default=30,
+        help="Connection timeout in seconds (default: 30)",
+    )
+
+    parser.add_argument(
+        "--no-trace",
+        action="store_false",
+        help="Disable SAP RFC trace logging",
     )
 
     parser.add_argument(
@@ -118,9 +120,12 @@ def main() -> int:
         return 0
 
     print(f"[i] Connecting to SAP system: {args.target}")
+    print(f"|-> Timeout: {args.timeout}s")
+    print(f"|-> SysNr: {args.sysnr}")
     print(f"|-> Username: {args.username}")
     print(f"|-> Client: {args.client}")
     print(f"|-> Group: {args.group}")
+    print(f"|-> Trace: {'disabled' if args.no_trace else 'enabled'}")
 
     try:
         # Create SAP system instance
@@ -131,6 +136,8 @@ def main() -> int:
             client=args.client,
             sysnr=args.sysnr,
             group=args.group,
+            timeout=args.timeout,
+            trace=not args.no_trace,
         ) as sap_system:
 
             # Set OS filter
@@ -141,10 +148,9 @@ def main() -> int:
 
             terminal.run(sap_system)
     except Exception as exc:
-        print(f"[x] An error occurred: {exc}")
-    finally:
-        # Delete all .trc SAP log files
-        for trc_file in Path.cwd().glob("*.trc"):
-            trc_file.unlink(missing_ok=True)
+        print(f"[!] An error occurred: \n\n{exc}")
+        return 1
+    except KeyboardInterrupt:
+        return 1
 
     return 0
