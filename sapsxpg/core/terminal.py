@@ -64,31 +64,41 @@ def run(sap_system) -> None:
     try:
         while True:
             try:
-                prompt = f"{sap_system.host} ({sap_system.os})$ "
-                command_line = prompt_session.prompt(message=prompt).strip()
+                user_input = prompt_session.prompt(
+                    message=f"{sap_system.host} ({sap_system.os})$ "
+                ).strip()
 
-                if not command_line:
+                if not user_input:
                     continue
+            except KeyboardInterrupt:
+                if prompt_session.app.current_buffer.text:
+                    # If there's text in the buffer, just clear it and continue
+                    continue
+                break
 
-                # Parse command and parameters
-                parts = command_line.split(" ", 1)
-                command = parts[0]
-                parameters = parts[1] if len(parts) > 1 else ""
+            except Exception as exc:
+                print(f"[x] Error reading input: {exc}")
+                continue
 
-                # Handle exit commands
-                if command.lower() in ["exit", "quit", "q"]:
-                    print("👋 Goodbye!")
-                    break
+            # Parse command and parameters
+            parts = user_input.split(" ", 1)
+            command = parts[0]
+            parameters = parts[1] if len(parts) > 1 else ""
 
-                # Check if command is supported (built-in commands or SAP commands)
-                built_in_commands = ["ls", "cat", "ps", "env", "h", "help", "?"]
-                if command not in built_in_commands:
-                    # Check if it's an available SAP command
-                    if not sap_system.is_command_available(command):
-                        print("[x] Command not found")
-                        print("[i] Use 'h' or 'help' to see all available SAP commands")
-                        continue
+            # Handle exit commands
+            if command.lower() in ["exit", "quit", "q"]:
+                print("👋 Goodbye!")
+                break
 
+            # Check if command is supported (built-in commands or SAP commands)
+            built_in_commands = ["ls", "cat", "ps", "env", "h", "help", "?"]
+            if command not in built_in_commands:
+                # Check if it's an available SAP command
+                if not sap_system.is_command_available(command):
+                    print("[x] Command not found")
+                    print("[i] Use 'h' or 'help' to see all available SAP commands")
+                    continue
+            try:
                 output = sap_system.execute_command(command, parameters)
 
                 if command in ["h", "help", "?"] and output:
@@ -99,8 +109,11 @@ def run(sap_system) -> None:
                     print(output)
 
             except KeyboardInterrupt:
-                break
+                print("\r", end="", flush=True)  # Clear the ^C
+                print("[!] Keyboard interruption received during command execution.")
+            except Exception as exc:
+                print(f"[x] Error executing command: {exc}")
 
     except Exception as exc:
-        print(f"Fatal error: {exc}")
+        print(f"[x] Fatal error: {exc}")
         return
