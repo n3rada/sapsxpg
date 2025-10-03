@@ -6,22 +6,26 @@ except ImportError:
     Connection = None  # Handle missing pyrfc gracefully
 
 
-def execute(command: str, timeout: float = None) -> str:
+def execute(command: str, timeout: float = 30) -> str:
     """Execute a command using SAP's SXPG_CALL_SYSTEM function module."""
 
+    # Build connection parameters
+    conn_params = {
+        "user": "<USERNAME>",
+        "passwd": "<PASSWORD>",
+        "ashost": "<HOST>",
+        "sysnr": "<SYSNR>",
+        "client": "<CLIENT>",
+        "lang": "EN",
+        "config": {"timeout": timeout},
+    }
+
+    # Add optional parameters if present
+    <GROUP_PARAM>
+    <TRACE_PARAM>
+
     # Establish connection to the SAP system
-    conn = Connection(
-        **{
-            "user": "<USERNAME>",
-            "passwd": "<PASSWORD>",
-            "ashost": "<HOST>",
-            "group": "<GROUP>",
-            "sysnr": "<SYSNR>",
-            "client": "<CLIENT>",
-            "trace": "3",
-            "lang": "EN",
-        }
-    )
+    conn = Connection(**conn_params)
 
     prepared_command = command.replace(" ", "${IFS}")
 
