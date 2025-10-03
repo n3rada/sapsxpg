@@ -1,14 +1,4 @@
-## File: sapsxpg/core/terminal.py
-
-"""Interactive Terminal Interface Module.
-
-This module provides an interactive command-line interface for executing
-SAP system commands. It handles command input, autocompletion, history
-management, and result display in a terminal-like environment.
-
-The terminal supports command history, tab completion, and displays command
-output in a user-friendly format.
-"""
+# sapsxpg/core/terminal.py
 
 # External library imports
 from prompt_toolkit import PromptSession
