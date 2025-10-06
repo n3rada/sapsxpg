@@ -405,10 +405,12 @@ class SAPSystem:
                     data = json.load(f)
 
                 # Display summary from cached data
-                summary = f"SAP External Commands Summary\n"
-                summary += "=" * 40 + "\n"
-                summary += f"Total Commands: {data['meta']['total_commands']}\n"
-                summary += f"Operating Systems: {len(data['commands_by_os'])}\n\n"
+                summary = (
+                    "SAP External Commands (SM69) Summary\n"
+                    + "=" * 40 + "\n"
+                    + f"Total Commands: {data['meta']['total_commands']}\n"
+                    + f"Operating Systems: {len(data['commands_by_os'])}\n\n"
+                )
 
                 # Show command count per OS
                 for os_name, commands in data["commands_by_os"].items():
