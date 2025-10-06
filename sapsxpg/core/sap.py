@@ -461,11 +461,11 @@ class SAPSystem:
             except Exception as e:
                 print(f"[-] Failed to save command list: {e}")
 
-            summary = f"SAP External Commands Summary\n"
-            summary += "=" * 40 + "\n"
-            summary += f"Total Commands: {len(command_list)}\n"
-            summary += (
-                f"Operating Systems: {len(organized_commands['commands_by_os'])}\n\n"
+            summary = (
+                "SAP External Commands (SM69) Summary\n"
+                + "=" * 40 + "\n"
+                + f"Total Commands: {len(command_list)}\n"
+                + f"Operating Systems: {len(organized_commands['commands_by_os'])}\n\n"
             )
 
             # Show command count per OS
