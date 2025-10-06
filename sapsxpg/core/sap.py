@@ -365,7 +365,7 @@ class SAPSystem:
         defined_parameters = command_name if command_name else ""
         additional_parameters = parameters if parameters else ""
         total_length = len(defined_parameters) + len(additional_parameters)
-        if total_length >= 127:
+        if total_length >= 128:
             print(f"[x] SAP SXPG argument limit exceeded: {total_length} chars (max 128). Aborting call.")
             print(f"[i] COMMANDNAME: '{defined_parameters}' ({len(defined_parameters)} chars)")
             print(f"[i] ADDITIONAL_PARAMETERS: '{additional_parameters}' ({len(additional_parameters)} chars)")
