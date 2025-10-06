@@ -148,8 +148,11 @@ class SAPSystem:
             # Connect to SAP and run ENV command to detect OS
             print("[i] Detecting remote OS via SAP ENV command...")
 
+            # XPG_CALL_SYSTEM has a 128-char limit for the argument string
             response = self.__connection.call(
-                "SXPG_CALL_SYSTEM", COMMANDNAME="ENV", ADDITIONAL_PARAMETERS=""
+                "SXPG_CALL_SYSTEM",
+                COMMANDNAME="ENV",
+                ADDITIONAL_PARAMETERS=""
             )
 
             # Parse environment variables to detect OS
@@ -331,7 +334,6 @@ class SAPSystem:
             function_to_execute = {
                 "COMMANDNAME": "ENV",
             }
-
         else:
             # Check if the command is available in SAP system
             cmd_info = self.is_command_available(command)
@@ -358,6 +360,16 @@ class SAPSystem:
 
         command_name = function_to_execute.get("COMMANDNAME", command)
         parameters = function_to_execute.get("ADDITIONAL_PARAMETERS", "")
+
+        # Guard: DEFINED_PARAMETERS + ADDITIONAL_PARAMETERS must be <= 128 chars
+        defined_parameters = command_name if command_name else ""
+        additional_parameters = parameters if parameters else ""
+        total_length = len(defined_parameters) + len(additional_parameters)
+        if total_length > 128:
+            print(f"[x] SAP SXPG argument limit exceeded: {total_length} chars (max 128). Aborting call.")
+            print(f"[i] COMMANDNAME: '{defined_parameters}' ({len(defined_parameters)} chars)")
+            print(f"[i] ADDITIONAL_PARAMETERS: '{additional_parameters}' ({len(additional_parameters)} chars)")
+            return None
 
         print(f"[i] Executing SAP command: {command_name} {parameters}")
 

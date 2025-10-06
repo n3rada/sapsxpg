@@ -77,7 +77,6 @@ def run(sap_system) -> None:
 
             # Handle exit commands
             if command.lower() in ["exit", "quit", "q"]:
-                print("👋 Goodbye!")
                 break
 
             # Check if command is supported (built-in commands or SAP commands)
