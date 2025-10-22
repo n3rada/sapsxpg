@@ -11,7 +11,7 @@ from sapsxpg.core import sap
 from sapsxpg.utils import methods
 
 
-def parse_args() -> argparse.Namespace:
+def build_parser() -> argparse.ArgumentParser:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         prog="sapsxpg",
@@ -80,14 +80,20 @@ def parse_args() -> argparse.Namespace:
         const="ZSH",
     )
 
-    return parser.parse_args()
+    return parser
 
 
 def main() -> int:
     """Run the interactive console application."""
     print(methods.banner())
 
-    args = parse_args()
+    parser = build_parser()
+    args = parser.parse_args()
+
+    # Show help if no cli args provided
+    if len(sys.argv) <= 1:
+        parser.print_help()
+        return 1
 
     if args.rce_poc is not None:
         poc_code = Path(__file__).parent / "utils" / "template.py"
