@@ -1,4 +1,4 @@
-
+Simplifying the usage of the [`SXPG_CALL_SYSTEM`](https://help.sap.com/saphelp_scm700_ehp01/helpdata/EN/4d/947a7c2cdb6c14e10000000a15822b/content.htm?no_cache=true) FM over a SAP server with logging.
 
 ## Requirement
 
