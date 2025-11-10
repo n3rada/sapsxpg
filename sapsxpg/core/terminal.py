@@ -34,7 +34,7 @@ class SAPCommandCompleter(Completer):
         self.__sap_commands = self.__sap_system.get_available_commands()
 
 
-def run(sap_system) -> None:
+def run(sap_system) -> int:
     """Run the interactive SAP command shell"""
 
     # Create command completer
@@ -60,11 +60,16 @@ def run(sap_system) -> None:
 
                 if not user_input:
                     continue
+            except EOFError:
+                # Control-D pressed - normal exit
+                return 0
             except KeyboardInterrupt:
+                # Control-C pressed - check if buffer has text first
                 if prompt_session.app.current_buffer.text:
                     # If there's text in the buffer, just clear it and continue
                     continue
-                break
+
+                return 130  # SIGINT exit code
 
             except Exception as exc:
                 print(f"[x] Error reading input: {exc}")
@@ -105,4 +110,6 @@ def run(sap_system) -> None:
 
     except Exception as exc:
         print(f"[x] Fatal error: {exc}")
-        return
+        return 1
+
+    return 0

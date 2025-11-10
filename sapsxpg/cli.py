@@ -1,14 +1,15 @@
-# sapsxpg/cli.py
-
+# Built-in imports
+import sys
 import argparse
 from pathlib import Path
 
 # External library imports
 
 # Local library imports
+from sapsxpg import __version__
 from sapsxpg.core import terminal
 from sapsxpg.core import sap
-from sapsxpg.utils import methods
+from sapsxpg.utils import methods, banner
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -17,6 +18,13 @@ def build_parser() -> argparse.ArgumentParser:
         prog="sapsxpg",
         description="Interactive console application to simplify the SXPG_CALL_SYSTEM usage on a targeted SAP system.",
         add_help=True,
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Show version and exit.",
     )
 
     parser.add_argument(
@@ -85,7 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     """Run the interactive console application."""
-    print(methods.banner())
+    print(banner.display_banner())
 
     parser = build_parser()
     args = parser.parse_args()
@@ -168,11 +176,12 @@ def main() -> int:
             else:
                 sap_system.detect_current_os()
 
-            terminal.run(sap_system)
+            return terminal.run(sap_system)
+    except KeyboardInterrupt:
+        print("\n[!] Operation interrupted by user")
+        return 130
     except Exception as exc:
         print(f"[!] An error occurred: \n\n{exc}")
-        return 1
-    except KeyboardInterrupt:
         return 1
 
     return 0

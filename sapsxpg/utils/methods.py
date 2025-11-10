@@ -25,15 +25,3 @@ export LD_LIBRARY_PATH="$NWRFCSDK_PATH/lib:"
 """
 
     return tips
-
-
-def banner() -> str:
-    """Return the application banner."""
-    return r"""
-     _____  ___    ____
-    /  ___|/ _ \  |  _ \
-    \ `--./ /_\ \ | |_) |
-     `--. \  _  | |  __/
-    /\__/ / | | | | |
-    \____/\_| |_/ |_|   SXPG_CALL_SYSTEM
-    """
