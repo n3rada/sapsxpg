@@ -55,7 +55,7 @@ def run(sap_system) -> int:
         while True:
             try:
                 user_input = prompt_session.prompt(
-                    message=f"{sap_system.host} ({sap_system.os})$ "
+                    message=f"{sap_system.host} [{sap_system.connection_mode}] ({sap_system.os})$ "
                 ).strip()
 
                 if not user_input:

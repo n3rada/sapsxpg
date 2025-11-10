@@ -65,6 +65,8 @@ class SAPSystem:
         client="500",
         sysnr="00",
         group=None,
+        mshost=None,
+        r3name=None,
         timeout=30,
         trace=True,
     ):
@@ -74,52 +76,75 @@ class SAPSystem:
         self.__client = client
         self.__sysnr = sysnr
         self.__group = group
+        self.__mshost = mshost
+        self.__r3name = r3name
         self.__timeout = timeout
         self.__trace = trace
         self.__os = "all"  # Default OS filter
 
         self.__conn = None  # Persistent SAP connection
 
+        # Determine connection mode
+        self.__use_load_balancing = mshost is not None and r3name is not None
+
         # Get the current user's username
         username = getpass.getuser()
 
         # Use tempfile and pathlib for user-specific temporary directory
-        self.__temp_dir = Path(tempfile.gettempdir()) / username / self.__host
+        host_identifier = mshost if self.__use_load_balancing else host
+        self.__temp_dir = Path(tempfile.gettempdir()) / username / host_identifier
         self.__temp_dir.mkdir(parents=True, exist_ok=True)
 
-        self.__log_file = f"SAP-{self.__host}.log"
+        self.__log_file = f"SAP-{host_identifier}.log"
         self.__histfile = f"{self.__temp_dir}/.sapsxpg_history"
 
     def __connect(self):
         """Establish a persistent SAP connection"""
         if self.__conn is None:
             try:
-                # Build connection parameters
-                conn_params = {
-                    "user": self.__user,
-                    "passwd": self.__passwd,
-                    "ashost": self.__host,
-                    "client": self.__client,
-                    "sysnr": self.__sysnr,
-                    "lang": "EN",
-                    "config": {"timeout": self.__timeout},
-                }
+                # Build connection parameters based on connection mode
+                if self.__use_load_balancing:
+                    # Load-balanced connection via Message Server
+                    conn_params = {
+                        "user": self.__user,
+                        "passwd": self.__passwd,
+                        "mshost": self.__mshost,
+                        "r3name": self.__r3name,
+                        "group": self.__group,
+                        "client": self.__client,
+                        "lang": "EN",
+                        "config": {"timeout": self.__timeout},
+                    }
+                else:
+                    # Direct connection to Application Server
+                    conn_params = {
+                        "user": self.__user,
+                        "passwd": self.__passwd,
+                        "ashost": self.__host,
+                        "client": self.__client,
+                        "sysnr": self.__sysnr,
+                        "lang": "EN",
+                        "config": {"timeout": self.__timeout},
+                    }
+
+                    # Only include group if it's not None (for direct connection)
+                    if self.__group is not None:
+                        conn_params["group"] = self.__group
 
                 # Add trace parameter if enabled
                 if self.__trace:
                     conn_params["trace"] = "3"
 
-                # Only include group if it's not None
-                if self.__group is not None:
-                    conn_params["group"] = self.__group
-
                 self.__conn = Connection(**conn_params)
-                print("[i] SAP connection established")
+
+                mode = "load-balanced" if self.__use_load_balancing else "direct"
+                print(f"[i] SAP connection established ({mode})")
             except KeyboardInterrupt:
                 print("\n[!] Connection interrupted by user")
                 raise  # Re-raise to let CLI handle it
             except Exception as e:
                 print(f"[!] Failed to establish SAP connection: {e}")
+                raise  # Re-raise to let CLI handle it
                 raise  # Re-raise to let CLI handle it
 
     def __disconnect(self):
@@ -150,9 +175,7 @@ class SAPSystem:
 
             # XPG_CALL_SYSTEM has a 128-char limit for the argument string
             response = self.__connection.call(
-                "SXPG_CALL_SYSTEM",
-                COMMANDNAME="ENV",
-                ADDITIONAL_PARAMETERS=""
+                "SXPG_CALL_SYSTEM", COMMANDNAME="ENV", ADDITIONAL_PARAMETERS=""
             )
 
             # Parse environment variables to detect OS
@@ -366,9 +389,15 @@ class SAPSystem:
         additional_parameters = parameters if parameters else ""
         total_length = len(defined_parameters) + len(additional_parameters)
         if total_length >= 128:
-            print(f"[x] SAP SXPG argument limit exceeded: {total_length} chars (max 128). Aborting call.")
-            print(f"[i] COMMANDNAME: '{defined_parameters}' ({len(defined_parameters)} chars)")
-            print(f"[i] ADDITIONAL_PARAMETERS: '{additional_parameters}' ({len(additional_parameters)} chars)")
+            print(
+                f"[x] SAP SXPG argument limit exceeded: {total_length} chars (max 128). Aborting call."
+            )
+            print(
+                f"[i] COMMANDNAME: '{defined_parameters}' ({len(defined_parameters)} chars)"
+            )
+            print(
+                f"[i] ADDITIONAL_PARAMETERS: '{additional_parameters}' ({len(additional_parameters)} chars)"
+            )
             return None
 
         print(f"[i] Executing SAP command: {command_name} {parameters}")
@@ -407,7 +436,8 @@ class SAPSystem:
                 # Display summary from cached data
                 summary = (
                     "SAP External Commands (SM69) Summary\n"
-                    + "=" * 40 + "\n"
+                    + "=" * 40
+                    + "\n"
                     + f"Total Commands: {data['meta']['total_commands']}\n"
                     + f"Operating Systems: {len(data['commands_by_os'])}\n\n"
                 )
@@ -463,7 +493,8 @@ class SAPSystem:
 
             summary = (
                 "SAP External Commands (SM69) Summary\n"
-                + "=" * 40 + "\n"
+                + "=" * 40
+                + "\n"
                 + f"Total Commands: {len(command_list)}\n"
                 + f"Operating Systems: {len(organized_commands['commands_by_os'])}\n\n"
             )
@@ -510,7 +541,13 @@ class SAPSystem:
     # Properties
     @property
     def host(self):
-        return self.__host
+        """Get the display host (mshost if load-balanced, else ashost)"""
+        return self.__mshost if self.__use_load_balancing else self.__host
+
+    @property
+    def connection_mode(self):
+        """Get the connection mode description"""
+        return "load-balanced" if self.__use_load_balancing else "direct"
 
     @property
     def os(self):

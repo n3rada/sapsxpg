@@ -13,15 +13,15 @@ def execute(command: str, timeout: float = 30) -> str:
     conn_params = {
         "user": "<USERNAME>",
         "passwd": "<PASSWORD>",
-        "ashost": "<HOST>",
-        "sysnr": "<SYSNR>",
         "client": "<CLIENT>",
         "lang": "EN",
         "config": {"timeout": timeout},
     }
 
+    # Connection mode specific parameters
+    <CONNECTION_PARAMS>
+
     # Add optional parameters if present
-    <GROUP_PARAM>
     <TRACE_PARAM>
 
     # Establish connection to the SAP system

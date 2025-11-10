@@ -30,7 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "target",
         type=str,
-        help="Target SAP system (as defined in your saplogon.ini or SAP GUI)",
+        help="Target SAP system hostname or IP address",
     )
 
     parser.add_argument(
@@ -49,14 +49,45 @@ def build_parser() -> argparse.ArgumentParser:
         "-c", "--client", default="500", help="SAP client number (default: 500)"
     )
 
-    parser.add_argument(
-        "-s",
-        "--sysnr",
-        default="00",
-        help="SAP system number (default: 00)",
+    # Connection mode - mutually exclusive
+    conn_mode = parser.add_argument_group(
+        "Connection Mode",
+        "Choose between direct application server or load-balanced connection",
     )
 
-    parser.add_argument("-g", "--group", default=None, help="SAP logon group")
+    mode_group = conn_mode.add_mutually_exclusive_group()
+
+    # Option 1: Direct connection (specify system number)
+    mode_group.add_argument(
+        "-s",
+        "--sysnr",
+        default=None,
+        metavar="NN",
+        help="System number for direct connection to application server (default: 00 if neither -s nor -m specified)",
+    )
+
+    # Option 2: Load-balanced connection (specify message server)
+    mode_group.add_argument(
+        "-m",
+        "--mshost",
+        metavar="HOST",
+        help="Message server hostname for load-balanced connection (requires -r and -g)",
+    )
+
+    # Additional parameters for load-balanced mode
+    conn_mode.add_argument(
+        "-r",
+        "--r3name",
+        metavar="SID",
+        help="SAP system ID (R/3 name) - required when using -m/--mshost",
+    )
+
+    conn_mode.add_argument(
+        "-g",
+        "--group",
+        metavar="GROUP",
+        help="SAP logon group (required for -m/--mshost, optional for -s/--sysnr)",
+    )
 
     parser.add_argument(
         "-t",
@@ -112,22 +143,31 @@ def main() -> int:
         print(f"[i] Producing PoC code for command: {args.rce_poc}")
         command = args.rce_poc
 
+        # Determine connection mode
+        use_load_balancing = args.mshost is not None and args.r3name is not None
+
         with open(poc_code, "r", encoding="utf-8") as file:
             poc_template = file.read()
             poc_template = poc_template.replace("<USERNAME>", args.username)
             poc_template = poc_template.replace("<PASSWORD>", args.password)
-            poc_template = poc_template.replace("<HOST>", args.target)
-            poc_template = poc_template.replace("<SYSNR>", args.sysnr)
             poc_template = poc_template.replace("<CLIENT>", args.client)
             poc_template = poc_template.replace("<SAP_COMMAND>", command)
             poc_template = poc_template.replace("<TIMEOUT>", str(args.timeout))
 
-            # Conditionally add group parameter
-            if args.group is not None:
-                group_param = f'conn_params["group"] = "{args.group}"'
+            # Connection mode specific replacements
+            if use_load_balancing:
+                conn_mode_params = f'''conn_params["mshost"] = "{args.mshost}"
+    conn_params["r3name"] = "{args.r3name}"
+    conn_params["group"] = "{args.group}"'''
             else:
-                group_param = "# No group specified"
-            poc_template = poc_template.replace("<GROUP_PARAM>", group_param)
+                conn_mode_params = f'''conn_params["ashost"] = "{args.target}"
+    conn_params["sysnr"] = "{args.sysnr}"'''
+
+                # Add group for direct connection if specified
+                if args.group is not None:
+                    conn_mode_params += f'\n    conn_params["group"] = "{args.group}"'
+
+            poc_template = poc_template.replace("<CONNECTION_PARAMS>", conn_mode_params)
 
             # Conditionally add trace parameter
             if not args.no_trace:
@@ -137,7 +177,8 @@ def main() -> int:
 
             poc_template = poc_template.replace("<TRACE_PARAM>", trace_param)
 
-            poc_file = Path.cwd() / f"poc_{args.target}_{command}.py"
+            identifier = args.mshost if use_load_balancing else args.target
+            poc_file = Path.cwd() / f"poc_{identifier}_{command}.py"
             poc_file.unlink(missing_ok=True)
             poc_file.write_text(poc_template, encoding="utf-8")
 
@@ -149,13 +190,47 @@ def main() -> int:
         print(methods.nwrfc_sdk_tips())
         return 1
 
-    print(f"[i] Connecting to SAP system: {args.target}")
-    print(f"|-> Timeout: {args.timeout}s")
-    print(f"|-> SysNr: {args.sysnr}")
-    print(f"|-> Username: {args.username}")
-    print(f"|-> Client: {args.client}")
-    print(f"|-> Group: {args.group}")
-    print(f"|-> Trace: {'disabled' if args.no_trace else 'enabled'}")
+    # Determine connection mode
+    use_load_balancing = args.mshost is not None
+
+    # Validate connection parameters
+    if use_load_balancing:
+        # Load-balanced mode requires mshost, r3name, and group
+        if not args.r3name:
+            print("[x] Error: --mshost requires --r3name (SAP system ID)")
+            return 1
+        if not args.group:
+            print("[x] Error: --mshost requires --group (logon group)")
+            return 1
+    else:
+        # Direct mode - set default sysnr if not specified
+        if args.sysnr is None:
+            args.sysnr = "00"
+
+        # Warn if load-balancing parameters specified without mshost
+        if args.r3name:
+            print("[w] Warning: --r3name ignored without --mshost")
+
+    # Display connection info
+    if use_load_balancing:
+        print(f"[i] Connection mode: Load-balanced via Message Server")
+        print(f"|-> Message Server: {args.mshost}")
+        print(f"|-> System ID (R3NAME): {args.r3name}")
+        print(f"|-> Logon Group: {args.group}")
+        print(f"|-> Username: {args.username}")
+        print(f"|-> Client: {args.client}")
+        print(f"|-> Timeout: {args.timeout}s")
+        print(f"|-> Trace: {'disabled' if args.no_trace else 'enabled'}")
+    else:
+        print(f"[i] Connection mode: Direct to Application Server")
+        print(f"|-> Target: {args.target}")
+        print(f"|-> System Number: {args.sysnr}")
+        print(f"|-> Username: {args.username}")
+        print(f"|-> Client: {args.client}")
+        if args.group:
+            print(f"|-> Logon Group: {args.group}")
+        print(f"|-> Timeout: {args.timeout}s")
+        print(f"|-> Trace: {'disabled' if args.no_trace else 'enabled'}")
 
     try:
         # Create SAP system instance
@@ -166,6 +241,8 @@ def main() -> int:
             client=args.client,
             sysnr=args.sysnr,
             group=args.group,
+            mshost=args.mshost,
+            r3name=args.r3name,
             timeout=args.timeout,
             trace=not args.no_trace,
         ) as sap_system:
