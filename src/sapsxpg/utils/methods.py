@@ -1,5 +1,4 @@
-## File: sapsxpg/utils/methods.py
-
+# sapsxpg/utils/methods.py
 
 def check_nwrfc_sdk() -> bool:
     """Check if NWRFCSDK is properly installed"""

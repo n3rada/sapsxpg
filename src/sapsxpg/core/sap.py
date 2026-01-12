@@ -1,5 +1,6 @@
 # sapsxpg/core/sap.py
 
+# Built-in imports
 import json
 import os
 import getpass
@@ -135,16 +136,18 @@ class SAPSystem:
                 if self.__trace:
                     conn_params["trace"] = "3"
 
+                # Show the connection dict for debugging
+                print(f"[*] Establishing SAP connection with parameters:\n{json.dumps(conn_params, indent=2)}")
+
                 self.__conn = Connection(**conn_params)
 
                 mode = "load-balanced" if self.__use_load_balancing else "direct"
-                print(f"[i] SAP connection established ({mode})")
+                print(f"[+] SAP connection established ({mode})")
             except KeyboardInterrupt:
                 print("\n[!] Connection interrupted by user")
                 raise  # Re-raise to let CLI handle it
             except Exception as e:
                 print(f"[!] Failed to establish SAP connection: {e}")
-                raise  # Re-raise to let CLI handle it
                 raise  # Re-raise to let CLI handle it
 
     def __disconnect(self):
@@ -152,7 +155,7 @@ class SAPSystem:
         if self.__conn:
 
             self.__conn.close()
-            print("[i] SAP connection closed")
+            print("[+] SAP connection closed")
 
     def detect_current_os(self):
         """Auto-detect the remote SAP system's operating system"""
@@ -163,7 +166,7 @@ class SAPSystem:
             try:
                 with open(os_cache_file, "r") as f:
                     cached_os = f.read().strip()
-                print(f"[i] Using cached OS detection: {cached_os}")
+                print(f"[+] Using cached OS detection: {cached_os}")
                 self.__os = cached_os
                 return cached_os
             except Exception as e:
@@ -171,7 +174,7 @@ class SAPSystem:
 
         try:
             # Connect to SAP and run ENV command to detect OS
-            print("[i] Detecting remote OS via SAP ENV command...")
+            print("[+] Detecting remote OS via SAP ENV command...")
 
             # XPG_CALL_SYSTEM has a 128-char limit for the argument string
             response = self.__connection.call(
@@ -216,7 +219,7 @@ class SAPSystem:
                 try:
                     with open(os_cache_file, "w") as f:
                         f.write(detected_os)
-                    print(f"[i] Cached OS detection to: {os_cache_file}")
+                    print(f"[+] Cached OS detection to: {os_cache_file}")
                 except Exception as e:
                     print(f"[w] Could not cache OS detection: {e}")
 
@@ -225,7 +228,7 @@ class SAPSystem:
 
         except Exception as e:
             print(f"[w] Could not auto-detect remote OS: {e}")
-            print("[i] Falling back to Linux filter")
+            print("[+] Falling back to Linux filter")
             detected_os = "Linux"  # Safe fallback
 
             # Still try to cache the fallback
@@ -248,7 +251,7 @@ class SAPSystem:
         try:
             # Check if file exists
             if not os.path.exists(filename):
-                return f"[!] Commands file not found: {filename}\n[i] Run 'h' or 'help' first to generate the commands list."
+                return f"[!] Commands file not found: {filename}\n[+] Run 'h' or 'help' first to generate the commands list."
 
             # Read JSON file
             with open(filename, "r") as f:
@@ -378,7 +381,7 @@ class SAPSystem:
                     )
             else:
                 print(f"[x] Command not found: {command}")
-                print("[i] Use 'h' or 'help' to see available commands")
+                print("[+] Use 'h' or 'help' to see available commands")
                 return None
 
         command_name = function_to_execute.get("COMMANDNAME", command)
@@ -393,14 +396,14 @@ class SAPSystem:
                 f"[x] SAP SXPG argument limit exceeded: {total_length} chars (max 128). Aborting call."
             )
             print(
-                f"[i] COMMANDNAME: '{defined_parameters}' ({len(defined_parameters)} chars)"
+                f"[+] COMMANDNAME: '{defined_parameters}' ({len(defined_parameters)} chars)"
             )
             print(
-                f"[i] ADDITIONAL_PARAMETERS: '{additional_parameters}' ({len(additional_parameters)} chars)"
+                f"[+] ADDITIONAL_PARAMETERS: '{additional_parameters}' ({len(additional_parameters)} chars)"
             )
             return None
 
-        print(f"[i] Executing SAP command: {command_name} {parameters}")
+        print(f"[+] Executing SAP command: {command_name} {parameters}")
 
         with open(self.__log_file, mode="a", encoding="utf-8") as log_file:
             log_file.write(f"> {command_name} {parameters}\n")

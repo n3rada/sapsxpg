@@ -90,7 +90,7 @@ def run(sap_system) -> int:
                 # Check if it's an available SAP command
                 if not sap_system.is_command_available(command):
                     print("[x] Command not found")
-                    print("[i] Use 'h' or 'help' to see all available SAP commands")
+                    print("[+] Use 'h' or 'help' to see all available SAP commands")
                     continue
             try:
                 output = sap_system.execute_command(command, parameters)
