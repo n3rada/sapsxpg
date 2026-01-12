@@ -255,6 +255,9 @@ def main() -> int:
                 sap_system.detect_current_os()
 
             return terminal.run(sap_system)
+    except sap.SAPAuthorizationError as exc:
+        print(f"\n[x] Authorization Error: {exc}")
+        return 77  # EX_NOPERM
     except KeyboardInterrupt:
         print("\n[!] Operation interrupted by user")
         return 130

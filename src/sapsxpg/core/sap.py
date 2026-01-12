@@ -8,9 +8,15 @@ from pathlib import Path
 import tempfile
 
 try:
-    from pyrfc import Connection
+    from pyrfc import Connection, RFCError
 except ImportError:
     Connection = None  # Handle missing pyrfc gracefully
+    RFCError = Exception
+
+
+class SAPAuthorizationError(Exception):
+    """Raised when SAP user lacks required RFC authorization"""
+    pass
 
 
 def get_os_variants(os_name):
@@ -411,6 +417,13 @@ class SAPSystem:
         try:
             # Execute the remote function call
             response = self.__connection.call(function_name, **function_to_execute)
+        except RFCError as e:
+            if "RFC_NO_AUTHORITY" in str(e) or "RFC_AUTHORIZATION" in str(e):
+                raise SAPAuthorizationError(
+                    f"SAP user '{self.__user}' lacks RFC authorization."
+                )
+            print(f"[-] Error: {e}")
+            return None
         except Exception as e:
             print(f"[-] Error: {e}")
             return None
