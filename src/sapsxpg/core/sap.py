@@ -137,7 +137,7 @@ class SAPSystem:
                     conn_params["trace"] = "3"
 
                 # Show the connection dict for debugging
-                print(f"[*] Establishing SAP connection with parameters:\n{json.dumps(conn_params, indent=2)}")
+                # print(f"[*] Establishing SAP connection with parameters:\n{json.dumps(conn_params, indent=2)}")
 
                 self.__conn = Connection(**conn_params)
 
