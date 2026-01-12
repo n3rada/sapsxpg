@@ -141,7 +141,7 @@ def main() -> int:
             print(f"[x] PoC template file not found: {poc_code}")
             return 1
 
-        print(f"[i] Producing PoC code for command: {args.rce_poc}")
+        print(f"[+] Producing PoC code for command: {args.rce_poc}")
         command = args.rce_poc
 
         # Determine connection mode
@@ -183,7 +183,7 @@ def main() -> int:
             poc_file.unlink(missing_ok=True)
             poc_file.write_text(poc_template, encoding="utf-8")
 
-            print(f"[i] PoC code written to: {poc_file}")
+            print(f"[+] PoC code written to: {poc_file}")
 
         return 0
 
@@ -214,7 +214,7 @@ def main() -> int:
 
     # Display connection info
     if use_load_balancing:
-        print(f"[i] Connection mode: Load-balanced via Message Server")
+        print(f"[+] Connection mode: Load-balanced via Message Server")
         print(f"|-> Message Server: {args.mshost}")
         print(f"|-> System ID (R3NAME): {args.r3name}")
         print(f"|-> Logon Group: {args.group}")
@@ -223,7 +223,7 @@ def main() -> int:
         print(f"|-> Timeout: {args.timeout}s")
         print(f"|-> Trace: {'disabled' if args.no_trace else 'enabled'}")
     else:
-        print(f"[i] Connection mode: Direct to Application Server")
+        print(f"[+] Connection mode: Direct to Application Server")
         print(f"|-> Target: {args.target}")
         print(f"|-> System Number: {args.sysnr}")
         print(f"|-> Username: {args.username}")
