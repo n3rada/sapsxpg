@@ -8,10 +8,9 @@ from pathlib import Path
 # External library imports
 
 # Local library imports
-from sapsxpg import __version__
-from sapsxpg.core import terminal
-from sapsxpg.core import sap
-from sapsxpg.utils import methods, banner
+from . import __version__, banner
+from .core import terminal, sap
+from .utils import methods
 
 
 def build_parser() -> argparse.ArgumentParser:

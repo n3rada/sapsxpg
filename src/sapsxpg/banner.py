@@ -1,8 +1,7 @@
-# toboggan/utils/banner.py
+# sapsxpg/banner.py
 
 # Local library imports
-from sapsxpg import __version__ as version
-
+from . import __version__ as version
 
 def display_banner() -> str:
     return rf"""
