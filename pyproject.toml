@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "sapsxpg"
-version = "0.9.1"
+version = "0.8.1"
 description = "Simplify the SXPG_CALL_SYSTEM usage on a targeted SAP system."
 authors = [
     {name = "n3rada",email = "72791564+n3rada@users.noreply.github.com"}
