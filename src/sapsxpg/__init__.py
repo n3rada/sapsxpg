@@ -3,7 +3,7 @@ from pathlib import Path
 import tomllib
 
 try:
-    __version__ = version("sapxpg")
+    __version__ = version("sapsxpg")
 except PackageNotFoundError:
     # Fallback: read directly from pyproject.toml for development
     try:
